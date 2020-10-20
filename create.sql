@@ -1,0 +1,23 @@
+CREATE TABLE users (
+  id INTEGER IDENTITY(1,1) PRIMARY KEY,
+  username VARCHAR(50) NOT NULL,
+  email VARCHAR(30) NOT NULL,
+  password VARCHAR(20) NOT NULL
+)
+
+CREATE TABLE books (
+  id INTEGER IDENTITY(1,1) PRIMARY KEY,
+  isbn_number VARCHAR(20) NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  author VARCHAR(50) NOT NULL,
+  publication_year VARCHAR(5) NOT NULL
+)
+
+CREATE TABLE reviews (
+  id INTEGER IDENTITY(1,1) NOT NULL,
+  name VARCHAR(30) NOT NULL,
+  review TEXT NOT NULL,
+  rating DECIMAL NOT NULL,
+  CONSTRAINT CHK_rating CHECK (rating >= 1 AND rating <= 5), 
+  book_number INTEGER REFERENCES books
+)

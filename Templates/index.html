@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Registration
+{% endblock %}
+
+{% block body %}
+  <h2>Welcome.....</h2>
+  <h4>Register below</h4>
+  <br>
+  <form action="{{ url_for('registration') }}" method="POST">
+    <div class="form-group">
+      <input type="text" name="username" autocomplete="off" class="form-control" placeholder="Enter your username"><br>
+      <input type="email" name="email" class="form-control" placeholder="Enter your email"><br>
+      <input type="password" name="password" class="form-control" placeholder="Enter your password"><br>
+      <button class="btn btn-primary "type="submit">Register</button>
+    </div>
+  </form>
+  <p>If already registered <a href="{{ url_for('login') }}">login here</a></p>
+{% endblock %}

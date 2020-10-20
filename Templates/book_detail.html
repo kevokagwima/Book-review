@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Book Details
+{% endblock %}
+
+{% block body %}
+  <h4>Book Details</h4>
+  <p>{{message}}</p>
+  <ul>
+    <div class="details">
+      <li><b>Isbn Number:</b> {{ book.isbn_number }}</li>
+      <li><b>Title:</b> {{ book.title }}</li>
+      <li><b>Author:</b> {{ book.author }}</li>
+      <li><b>Publication year:</b> {{ book.publication_year }}</li>
+      <li><b>Rating:</b> {{ rating.rating }} {{ error }}</li>
+      <hr>
+      <h2>Reviews</h2>
+      <P>No reviews </P>
+      <hr>
+    </div>
+  </ul>
+  <br>
+  <p id="text">{{ text }}</p> <p id="texts">{{ texts }}</p>
+  <br>
+  <div class="review">
+    <h4>Write a review</h4>
+    <form action="{{ url_for('review', book_id=book.id) }}" method="POST">
+      <input type="text" name="name" class="form-control"  placeholder="Enter your name" autocomplete="off"><br>
+      <textarea class="form-control" rows="5" name="review" placeholder="Write a review...."></textarea><br>
+      <input type="number" name="rating" class="form-control" placeholder="Give a rating">
+      <p><b>Rating is out of 5</b></p><br>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+{% endblock %}

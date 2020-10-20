@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  search
+{% endblock %}
+
+{% block body %}
+  <p class="log">logged in</p>
+  <hr>
+  <form action="{{ url_for('search') }}" method="POST" id="form">
+    <div class="search">
+      <input type="text" name="name" autocomplete="off" placeholder="Search for a book by isbn_number, title, author, publication_year" class="form-control" id="search"><br>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+    <div class="book">
+      <ul>
+        {% for book in books %}
+          <li class="books">
+            <a href="{{ url_for('books', book_id=book.id) }}" class="link">
+              <b>{{ book.isbn_number }}:</b> written by <b>{{ book.author }}</b> titled <b>{{ book.title }}</b> published in <b>{{ book.publication_year }}</b>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="message">{{message}}</p>
+    </div>
+{% endblock %}

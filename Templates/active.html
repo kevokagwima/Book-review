@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Active
+{% endblock %}
+
+{% block body %}
+ <h4>Active Users</h4>
+ <ul>
+  {% for users in username %}
+    <li>{{users}}</li>
+  {% endfor %}
+ </ul>
+{% endblock %}
