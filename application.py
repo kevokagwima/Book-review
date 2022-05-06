@@ -94,7 +94,6 @@ def search():
 @app.route("/api/search/<int:book_id>")
 def book_api(book_id):
   book = db.session.query(Books).filter(Books.id == book_id).first()
-  rating = db.execute("SELECT rating FROM reviews WHERE book_number = :id", {"id":book_id}).fetchone()
 
   if book is None:
     return jsonify({"error": "Invalid book"})
@@ -103,8 +102,7 @@ def book_api(book_id):
     "ISBN NUMBER": book.isbn_number,
     "Title": book.title,
     "Author": book.author,
-    "Publication Year": book.publication_year,
-    "Rating": rating
+    "Publication Year": book.publication_year
   })
 
 if __name__ == '__main__':
