@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block title %}
+Book Review | Registration
+{% endblock %}
+
+{% block body %}
+<div class="form">
+  <h4>Register below</h4>
+  <form method="POST">
+    {{ form.csrf_token }}
+    <div class="input">
+      {{ form.username.label }}
+      {{ form.username(placeholder="Enter username") }}
+    </div>
+    <div class="input">
+      {{ form.email_address.label }}
+      {{ form.email_address(placeholder="Enter Email Address") }}
+    </div>
+    <div class="input">
+      {{ form.phone_number.label }}
+      {{ form.phone_number(placeholder="Enter Phone Number") }}
+    </div>
+    <div class="input">
+      {{ form.password.label }}
+      {{ form.password(placeholder="Enter Password") }}
+    </div>
+    <div class="input">
+      {{ form.password1.label }}
+      {{ form.password1(placeholder="Confirm Password") }}
+    </div>
+    <button class="btn" type="submit">Register</button>
+  </form>
+  <div class="box">
+    <p>If already registered <a href="{{ url_for('login') }}">login here</a></p>
+  </div>
+</div>
+{% endblock %}

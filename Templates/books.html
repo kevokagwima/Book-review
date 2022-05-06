@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books.css') }}">
+{% endblock %}
+
+{% block title %}
+Book Review | All Books
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <h4>All books - <span>{{ "{:,}".format(books|count) }}</span></h4>
+  <div class="book-container">
+    {% if books|count > 0 %}
+    {% for book in books %}
+    <div loading="lazy" class="book-details">
+      <div class="img">
+        <img src="{{ url_for('static', filename='Images/not-found.png') }}" alt="book">
+      </div>
+      <div class="book-info">
+        <div class="book-info-div">
+          <h4>ISBN Number</h4>
+          <p>{{ book.isbn_number }}</p>
+        </div>
+        <div class="book-info-div">
+          <h4>Title</h4>
+          <p>{{ book.title }}</p>
+        </div>
+        <div class="book-info-div">
+          <h4>By</h4>
+          <p>{{ book.author }}</p>
+        </div>
+        <div class="book-info-div">
+          <h4>Published in</h4>
+          <p>{{ book.year }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <a href="{{ url_for('all_books') }}" id="else">View all books</a>
+    {% endif %}
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='Js/books.js') }}"></script>
+{% endblock %}

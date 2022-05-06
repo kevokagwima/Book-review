@@ -1,0 +1,67 @@
+body {
+  background-color: teal;
+}
+
+.container {
+  background-color: teal;
+  margin-top: 4rem;
+  padding: 1.5rem 0.5rem 0.5rem 2rem;
+  color: white;
+}
+
+.container > h4 {
+  font-family: var(--heading-font);
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.container > h4 > span {
+  color: greenyellow;
+}
+
+.book-container {
+  max-height: 83vh;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2rem;
+  margin-top: 0.5rem;
+  padding: 1rem 1rem 1rem 0;
+}
+
+.book-details {
+  background-color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 10px -6px black;
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  min-height: 8rem;
+  overflow: hidden;
+  text-align: center;
+  padding: 10px;
+}
+
+.img img {
+  width: 5rem;
+  height: inherit;
+  max-height: 10rem;
+}
+
+.book-info {
+  color: #212121;
+  padding: 5px 15px;
+  font-family: "Dancing Script", cursive;
+  font-family: "Varela Round", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.book-info-div > h4 {
+  font-size: 0.9rem;
+  font-weight: bold;
+}

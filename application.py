@@ -1,118 +1,111 @@
-import os
-
-from flask import Flask, session, render_template, request, jsonify
+from operator import or_
+from flask import Flask, session, render_template, request, jsonify, flash,redirect, url_for
+from flask_login import current_user, login_manager, LoginManager, login_user
 from flask_session import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import or_
+from form import *
+from models import *
 
 app = Flask(__name__)
-
-if not ('mssql://KEVINKAGWIMA/project1?driver=sql server?trusted_connection=yes'):
-    raise RuntimeError("DATABASE_URL is not set")
-
+app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///site.db'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SECRET_KEY"] = "asecretkeythatissupposedtobeasecret"
 Session(app)
+db.init_app(app)
+login_manager = LoginManager()
+login_manager.login_views = '/login'
+login_manager.login_message_category = "danger"
+login_manager.init_app(app)
 
-engine = create_engine('mssql://KEVINKAGWIMA/project1?driver=sql server?trusted_connection=yes')
-db = scoped_session(sessionmaker(bind=engine))
+@login_manager.user_loader
+def load_user(user_id):
+  try:
+    return User.query.filter_by(phone=user_id).first()
+  except:
+    flash(f"Could not load user into session", category="danger")
 
 @app.route("/")
+@app.route("/home")
 def index():
-    return render_template("index.html")
+  return render_template("index.html")
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["POST", "GET"])
 def registration():
-    username = request.form.get("username")
-    email = request.form.get("email")
-    password = request.form.get("password")
+  form = user_registration()
+  if form.validate_on_submit():
+    user = User(
+      username = form.username.data,
+      email = form.email_address.data,
+      phone = form.phone_number.data,
+      passwords = form.password.data
+    )
+    db.session.add(user)
+    db.session.commit()
+    flash(f"Registration successfull", category="success")
+    return redirect(url_for('login'))
 
-    if db.execute("SELECT username, email FROM users WHERE username=:username or email=:email",
-        {"username":username, "email":email}).rowcount != 0:
-        return render_template("error.html", message="A user already exists with those credentials. Try again.")
+  if form.errors != {}:
+    for err_msg in form.errors.values():
+      flash(f"{err_msg}", category="danger")
 
-    db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
-        {"username":username, "email":email, "password":password})
-
-    db.commit()
-    return render_template("success.html", message="User registered.")
-
-@app.route("/login")
+  return render_template("register.html", form=form)
+  
+@app.route("/login", methods=["POST", "GET"])
 def login():
-    return render_template("login.html")
+  form = user_login()
+  if form.validate_on_submit():
+    user = User.query.filter_by(email=form.email_address.data).first()
+    if user and user.check_password_correction(attempted_password=form.password.data):
+      login_user(user, remember=True)
+      flash(f"Login successfull", category="success")
+      return redirect(url_for('index'))
+    if user is None:
+      flash(f"No user with that email address", category="danger")
+      return redirect(url_for('login'))
+    else:
+      flash(f"Invalid credentials", category="danger")
+      return redirect(url_for('login'))
 
-@app.route("/authenticate", methods=["POST"])
-def authenticate():
-    username = request.form.get("username")
-    password = request.form.get("password")
+  return render_template("login.html", form=form)
 
-    if session.get("username") is None:
-        session["user_id"] = []
+@app.route("/all-books")
+def all_books():
+  books = Books.query.limit(100).all()
 
-    if db.execute("SELECT username, password FROM users WHERE username=:username and password=:password",
-        {"username":username, "password":password}).rowcount == 0:
-        return render_template("error.html", message="Invalid login details. try again", text="If not you register first.")
+  return render_template("books.html", books=books)
 
-    session["user_id"].append(username)
-    return render_template("success1.html", name=username)
-
-@app.route("/active")
-def active():
-    return render_template("active.html", username=session["user_id"])
-
-@app.route("/search", methods=["POST", "GET"])
+@app.route("/search-book", methods=["POST", "GET"])
 def search():
-    name = request.form.get("name")
+  search_text = request.form.get("search")
+  search = search_text.title()
+  books = Books.query.filter(or_(Books.author.like(search), Books.year.like(search), Books.isbn_number.like(search), Books.title.like(search))).all()
+  if len(books) == 0 or search == "all":
+    flash(f"Search was complete. Found {len(books)} results. Now viewing all books", category="success")
+    return redirect(url_for('all_books'))
+  if len(books) == 1:
+    flash(f"Search was complete. Found {len(books)} result", category="success")
+  else:
+    flash(f"Search was complete. Found {len(books)} results", category="success")
 
-    if db.execute("SELECT * FROM books WHERE (isbn_number = :name) or (publication_year = :name) or (title = :name) or (author = :name)", {"name":name}).rowcount == 0:
-        return render_template("search.html", message="No result")
-
-    books = db.execute("SELECT * FROM books WHERE (isbn_number = :name) or (publication_year = :name) or (title = :name) or (author = :name)", {"name":name}).fetchall()
-
-    return render_template("search.html", books=books)
-
-@app.route("/search/<int:book_id>", methods=["GET"])
-def books(book_id):
-    global book
-    book = db.execute("SELECT * FROM books WHERE id = :id",{"id":book_id}).fetchone()
-    
-    rating = db.execute("SELECT rating FROM reviews WHERE book_number = :id", {"id":book_id}).fetchone()
-
-    if book is None:
-        return render_template("book_detail.html", book=book, rating=rating, message="No such book")
-
-    if rating is None:
-        return render_template("book_detail.html", book=book, rating=rating, error="No rating")
-
-    return render_template("book_detail.html", book=book, rating=rating)
-
-@app.route("/review/search/<int:book_id>", methods=["POST"])
-def review(book_id):
-    name = request.form.get("name")
-    review = request.form.get("review")
-    rating = request.form.get("rating")
-
-    if db.execute("SELECT name FROM reviews WHERE name = :name", {"name":name}).rowcount != 0:
-        return render_template("book_detail.html", book=book, rating=rating, text="Cannot write more than one review")
-
-    db.execute("INSERT INTO reviews (name, review, rating, book_number) VALUES (:name, :review, :rating, :book_number)",{"name":name, "review":review, "rating":rating, "book_number":book_id})
-
-    db.commit()
-    return render_template("book_detail.html", book=book, rating=rating, texts="Review saved.")
+  return render_template("books.html", books=books)
 
 @app.route("/api/search/<int:book_id>")
 def book_api(book_id):
-    book = db.execute("SELECT * FROM books WHERE id = :id", {"id":book_id}).fetchone()
+  book = db.session.query(Books).filter(Books.id == book_id).first()
+  rating = db.execute("SELECT rating FROM reviews WHERE book_number = :id", {"id":book_id}).fetchone()
 
-    rating = db.execute("SELECT rating FROM reviews WHERE book_number = :id", {"id":book_id}).fetchone()
+  if book is None:
+    return jsonify({"error": "Invalid book"})
 
-    if book is None:
-        return jsonify({"error": "Invalid book"})
+  return jsonify({
+    "ISBN NUMBER": book.isbn_number,
+    "Title": book.title,
+    "Author": book.author,
+    "Publication Year": book.publication_year,
+    "Rating": rating
+  })
 
-    return jsonify({
-        "ISBN NUMBER": book.isbn_number,
-        "Title": book.title,
-        "Author": book.author,
-        "Publication Year": book.publication_year,
-        "Rating": rating
-    })
+if __name__ == '__main__':
+    app.run(debug=True, port=5005)

@@ -1,107 +1,53 @@
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
+  {% block head %}
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  <title>{% block title %} {% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <title>{% block title %}{% endblock %}</title>
+  {% endblock %}
 </head>
 
-<style>
-  .container_1 {
-    margin: 10px;
-  }
-
-  form {
-    text-align: center;
-    margin-left: 500px;
-    width: 490px;
-  }
-
-  h2, h4, p {
-    text-align: center;
-  }
-
-  .details {
-    text-align: center;
-    color: black;
-    font-weight: bold;
-  }
-
-  #text {
-    color: white;
-    background-color: red;
-  }
-
-  #texts {
-    color: white;
-    background-color: rgb(14, 216, 48);
-  }
-
-  .details b {
-    color: red;
-  }
-
-  .btn {
-    letter-spacing: 2px;
-  }
-  
-  .continue {
-    margin-left: 730px;
-  }
-
-  .log {
-    text-align: left;
-  }
-
-  .books {
-    color: black;
-    text-align: center;
-  }
-
-  #search {
-    width: 490px;
-  }
-
-  #form {
-    margin-left: 460px;
-  }
-
-  .search {
-    background-color: rgb(0, 18, 119);
-    display: flex;
-    padding: 5px;
-    border-radius: 5px;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    width: 590px;
-  }
-
-  .message {
-    margin-left: -30px;
-    font-weight: bold;
-  }
-
-  a:hover {
-    text-decoration: none;
-    color: rgb(5, 145, 201);
-  }
-
-  .link {
-    color: black;
-  }
-
-  ul {
-    list-style-type: none;
-    text-align: center;
-    margin-left: -45px;
-    color: rgb(235, 0, 0);
-  }
-
-</style>
-
 <body>
-  <div class="container_1">
-    {% block body %} {% endblock %}
+  <header>
+    <div id="logo">
+      <a href="{{ url_for('index') }}">
+        <h4>Book Review</h4>
+      </a>
+    </div>
+    <div class="nav">
+      <form action="{{ url_for('search') }}" method="post">
+        <input type="text" name="search" required spellcheck="false"
+          placeholder="Search for any book by ISBN number, title, author">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+    <div class="user">
+      {% if current_user.is_authenticated %}
+      <p>Welcome, <b>{{ current_user.username }}</b></p>
+      {% else %}
+      <a href="{{ url_for('registration') }}">Sign Up</a>
+      <a href="{{ url_for('login') }}">Sign In</a>
+      {% endif %}
+    </div>
+  </header>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="tops">
+    {% for category, message in messages %}
+    <div class="alert alert-{{category}}">
+      <div class="side"></div>
+      {{ message }}
+    </div>
+    {% endfor %}
   </div>
+  {% endif %}
+  {% endwith %}
+  {% block body %}{% endblock %}
 </body>
+
 </html>
